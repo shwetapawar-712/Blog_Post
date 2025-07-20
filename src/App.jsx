@@ -1,16 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React,{useState, useEffect} from 'react'
+import authservice from './appwrite/auth';
 import './App.css'
+import { useDispatch } from 'react-redux';
+import authService from './appwrite/auth';
+import {login, logout} from "./store/authSlice"
+import { Footer, Header } from './components';
+import { Outlet } from 'react-router-dom';
 
 function App() {
-  const [count, setCount] = useState(0)
+ const [loading, setLoading] = useState(true);
+ const dispatch = useDispatch();   //send actions to the Redux store to update the state.
+ 
+ useEffect (() =>{
+  authService.getCurrentUser()
+  .then((userData) => {
+    if (userData){
+      dispatch(login ({userData}))
+    }else{
+      dispatch(logout())
+    }
+  })
+  .catch((error) =>{
+    console.log("Error fetching user data:",error);
+    dispatch(logout());
+  })
+  .finally(() => setLoading (false))
+ }, [])
+ 
+return !loading ? (
+ <div className='min-h-screen flex flex-wrap content-between bg-black'>
+  <div className='w-full block'>
+   <Header/>
+   <main>
+   TODO: {/* <Outlet/> */}
+   </main>
+   <Footer/>
+  </div>
+ </div>
 
-  return (
-    <>
-    <h1>Hello</h1>
-    </>
-  )
+) : null
 }
 
 export default App
